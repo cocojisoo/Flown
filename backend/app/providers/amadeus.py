@@ -36,8 +36,6 @@ class AmadeusProvider:
     
     async def _get_access_token(self) -> Optional[str]:
         """Amadeus API 액세스 토큰 획득"""
-        # 실제 구현 시 OAuth 2.0 토큰 요청
-        # 여기서는 모의 토큰 반환
         if not self.access_token:
             try:
                 # OAuth 2.0 토큰 요청
@@ -84,43 +82,8 @@ class AmadeusProvider:
         Returns:
             FlightSegment 리스트
         """
-        # 실제 구현 시 Amadeus API 호출
-        # 여기서는 모의 데이터 반환
-        
         logger.info(f"Amadeus 검색: {origin} → {destination} ({departure_date})")
         
-        # 모의 응답 데이터
-        segments = []
-        
-        # 편도 검색
-        outbound_segment = self._create_mock_segment(
-            origin=origin,
-            destination=destination,
-            date=departure_date,
-            base_price=80000 if origin == "ICN" else 70000
-        )
-        segments.append(outbound_segment)
-        
-        # 왕복 검색
-        if return_date:
-            return_segment = self._create_mock_segment(
-                origin=destination,
-                destination=origin,
-                date=return_date,
-                base_price=85000 if destination == "ICN" else 75000
-            )
-            segments.append(return_segment)
-        
-        return segments
-    
-    def _create_mock_segment(
-        self,
-        origin: str,
-        destination: str,
-        departure_date: date,
-        return_date: Optional[date] = None
-    ) -> List[FlightSegment]:
-        """실제 Amadeus API 호출"""
         try:
             # 액세스 토큰 획득
             token = await self._get_access_token()
@@ -161,16 +124,7 @@ class AmadeusProvider:
         except Exception as e:
             logger.error(f"❌ Amadeus API 호출 오류: {e}")
         
-        return FlightSegment(
-            from_airport=origin,
-            to_airport=destination,
-            price=final_price,
-            provider="Amadeus",
-            date=date,
-            flight_number=f"KE{random.randint(100, 999)}",
-            departure_time="09:00",
-            arrival_time="11:30"
-        )
+        return []
     
     async def search_one_way(
         self,

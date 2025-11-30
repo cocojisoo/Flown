@@ -35,7 +35,7 @@ export default function App() {
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-12">
               <h1 className="text-white text-5xl md:text-6xl mb-4">
-                세계 어디든, FLOWN과 함께
+                세계 어디든, FLOWN와 함께
               </h1>
               <p className="text-white/90 text-xl">
                 최저가 항공권을 비교하고 예약하세요

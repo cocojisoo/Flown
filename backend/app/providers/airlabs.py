@@ -49,69 +49,44 @@ class AirLabsProvider:
         Returns:
             최저가 FlightSegment 또는 None
         """
-        # 실제 구현 시 AirLabs API 호출
-        # 여기서는 모의 데이터 반환
-        
         for attempt in range(MAX_RETRIES):
             try:
                 logger.info(f"AirLabs (Peach) 검색: {origin} → {destination} ({departure_date})")
                 
-                # 일본 국내선 가격은 훨씬 저렴함
-                return self._create_mock_segment(
-                    origin=origin,
-                    destination=destination,
-                    date=departure_date
-                )
+                # AirLabs API 호출
+                date_str = DateUtils.format_date_for_api(departure_date)
+                api_url = f"{self.base_url}/flights"
+                
+                params = {
+                    "api_key": self.api_key,
+                    "dep_iata": origin,
+                    "arr_iata": destination,
+                    "date": date_str
+                }
+                
+                response = await self.client.get(api_url, params=params)
+                response.raise_for_status()
+                data = response.json()
+                
+                # API 응답을 FlightSegment로 변환
+                segments = self.normalize_response(data)
+                if segments:
+                    return segments[0]  # 최저가 반환
+                return None
+                
+            except httpx.HTTPStatusError as e:
+                logger.error(f"❌ AirLabs API 호출 실패 (HTTP {e.response.status_code}): {e.response.text}")
+                if attempt == MAX_RETRIES - 1:
+                    return None
             except Exception as e:
                 if attempt == MAX_RETRIES - 1:
                     logger.error(f"AirLabs 검색 실패 (최대 재시도 초과): {e}")
-                    raise
+                    return None
                 delay = RETRY_DELAY_BASE * (2 ** attempt)  # Exponential backoff
                 logger.warning(f"AirLabs 검색 실패 (재시도 {attempt + 1}/{MAX_RETRIES}): {e}, {delay}초 후 재시도")
                 await asyncio.sleep(delay)
         
         return None
-    
-    def _create_mock_segment(
-        self,
-        origin: str,
-        destination: str,
-        date: date
-    ) -> FlightSegment:
-        """모의 세그먼트 생성 (테스트용)"""
-        import random
-        
-        # 일본 국내선 가격 범위: 5,000 ~ 15,000원
-        base_prices = {
-            ("KIX", "CTS"): 12000,
-            ("CTS", "KIX"): 11000,
-            ("KIX", "FUK"): 8000,
-            ("FUK", "KIX"): 7500,
-            ("NRT", "CTS"): 15000,
-            ("CTS", "NRT"): 14000,
-            ("NRT", "FUK"): 9000,
-            ("FUK", "NRT"): 8500,
-            ("KIX", "OKA"): 10000,
-            ("OKA", "KIX"): 9500,
-            ("CTS", "FUK"): 18000,
-            ("FUK", "CTS"): 17000,
-        }
-        
-        key = (origin, destination)
-        base_price = base_prices.get(key, 10000)
-        price_variation = random.randint(-2000, 3000)
-        final_price = max(5000, base_price + price_variation)
-        
-        return FlightSegment(
-            from_airport=origin,
-            to_airport=destination,
-            price=final_price,
-            provider="Peach",
-            date=date,
-            flight_number=f"MM{random.randint(100, 999)}",
-            departure_time="14:00",
-            arrival_time="15:30"
-        )
     
     async def search_multiple_routes(
         self,
