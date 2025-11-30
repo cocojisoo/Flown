@@ -39,11 +39,6 @@ class AmadeusProvider:
         # 실제 구현 시 OAuth 2.0 토큰 요청
         # 여기서는 모의 토큰 반환
         if not self.access_token:
-<<<<<<< Updated upstream
-            # 실제 API 호출 대신 모의 응답
-            logger.info("Amadeus 액세스 토큰 획득 (모의)")
-            self.access_token = "mock_access_token"
-=======
             try:
                 # OAuth 2.0 토큰 요청
                 token_url = "https://test.api.amadeus.com/v1/security/oauth2/token"
@@ -68,7 +63,6 @@ class AmadeusProvider:
             except Exception as e:
                 logger.error(f"❌ Amadeus 토큰 요청 실패: {e}")
         
->>>>>>> Stashed changes
         return self.access_token
     
     async def search_flight(
@@ -123,16 +117,6 @@ class AmadeusProvider:
         self,
         origin: str,
         destination: str,
-<<<<<<< Updated upstream
-        date: date,
-        base_price: int
-    ) -> FlightSegment:
-        """모의 세그먼트 생성 (테스트용)"""
-        # 실제 가격 변동 시뮬레이션
-        import random
-        price_variation = random.randint(-10000, 20000)
-        final_price = max(50000, base_price + price_variation)
-=======
         departure_date: date,
         return_date: Optional[date] = None
     ) -> List[FlightSegment]:
@@ -176,7 +160,6 @@ class AmadeusProvider:
             logger.error(f"❌ Amadeus API 호출 실패 (HTTP {e.response.status_code}): {e.response.text}")
         except Exception as e:
             logger.error(f"❌ Amadeus API 호출 오류: {e}")
->>>>>>> Stashed changes
         
         return FlightSegment(
             from_airport=origin,
